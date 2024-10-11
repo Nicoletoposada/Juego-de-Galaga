@@ -1,6 +1,6 @@
 import pygame #Biblioteca principal para el desarrollo de juegos en Python.
 import random #Módulo de Python para generar números aleatorios.
-import os  # Añade esta importación
+import os #Añade esta importación
 
 #Inicializar Pygame
 pygame.init()
@@ -85,12 +85,14 @@ class Jugador(pygame.sprite.Sprite):
 class Enemigo(pygame.sprite.Sprite):
     def __init__(self, nivel):
         super().__init__()
-        self.image = pygame.Surface((25, 20)) #Crear la imagen del enemigo
-        self.image.fill(ROJO)
+        # Cargar la imagen del enemigo
+        ruta_imagen = os.path.join("assets", "Enemigos.png")
+        self.image = pygame.image.load(ruta_imagen).convert_alpha()
+        self.image = pygame.transform.scale(self.image, (45, 38)) #Ajusta el tamaño si es necesario
         self.rect = self.image.get_rect()
-        self.rect.x = random.randint(0, ANCHO - self.rect.width) #Posición inicial aleatoria en x
-        self.rect.y = random.randint(-100, -40) #Posición inicial aleatoria en y (fuera de la pantalla)
-        self.velocidad_y = random.randint(1, 3) + nivel // 5 #Velocidad aumenta con el nivel
+        self.rect.x = random.randint(0, ANCHO - self.rect.width)
+        self.rect.y = random.randint(-100, -40)
+        self.velocidad_y = random.randint(1, 3) + nivel // 5
     
     def update(self):
         #Mover el enemigo hacia abajo
