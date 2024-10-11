@@ -42,10 +42,10 @@ class Bala(pygame.sprite.Sprite):
 class Jugador(pygame.sprite.Sprite):
     def __init__(self, todas_las_sprites, balas):
         super().__init__()
-        # Cargar la imagen de la nave
+        #Cargar la imagen de la nave
         ruta_imagen = os.path.join("assets", "Nave.PNG")
         self.image = pygame.image.load(ruta_imagen).convert_alpha()
-        self.image = pygame.transform.scale(self.image, (45, 38))  # Ajusta el tamaño si es necesario
+        self.image = pygame.transform.scale(self.image, (45, 38)) #Ajusta el tamaño si es necesario
         self.rect = self.image.get_rect()
         self.rect.centerx = ANCHO // 2 #Posición inicial en x
         self.rect.bottom = ALTO - 10 #Posición inicial en y
@@ -101,11 +101,11 @@ class Jugador(pygame.sprite.Sprite):
 class Enemigo(pygame.sprite.Sprite):
     def __init__(self, nivel, todas_las_sprites, balas_enemigas):
         super().__init__()
-        # Cargar la imagen del enemigo
+        #Cargar la imagen del enemigo
         ruta_imagen = os.path.join("assets", "Enemigos.png")
         self.image = pygame.image.load(ruta_imagen).convert_alpha()
         self.image = pygame.transform.scale(self.image, (45, 38))
-        self.image = pygame.transform.flip(self.image, False, True)  # Voltear verticalmente
+        self.image = pygame.transform.flip(self.image, False, True) #Voltear verticalmente
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(0, ANCHO - self.rect.width)
         self.rect.y = random.randint(-100, -40)
@@ -113,7 +113,7 @@ class Enemigo(pygame.sprite.Sprite):
         self.todas_las_sprites = todas_las_sprites
         self.balas_enemigas = balas_enemigas
         self.ultimo_disparo = pygame.time.get_ticks()
-        self.cadencia_disparo = random.randint(1000, 3000)  # Entre 1 y 3 segundos
+        self.cadencia_disparo = random.randint(1000, 3000) #Entre 1 y 3 segundos
     
     def update(self):
         #Mover el enemigo hacia abajo
@@ -123,7 +123,7 @@ class Enemigo(pygame.sprite.Sprite):
             self.rect.x = random.randint(0, ANCHO - self.rect.width)
             self.rect.y = random.randint(-100, -40)
         
-        # Lógica de disparo
+        #Lógica de disparo
         ahora = pygame.time.get_ticks()
         if ahora - self.ultimo_disparo > self.cadencia_disparo:
             self.disparar()

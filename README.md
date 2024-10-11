@@ -12,7 +12,7 @@
       
 - 🛸 **Control de Nave:** Usa las flechas del teclado para moverte
 - 🔫 **Sistema de Disparo:** Presiona la barra espaciadora para disparar
-- 👽 **Enemigos Dinámicos:** Enfréntate a oleadas de alienígenas
+- 🚀 **Enemigos Dinámicos:** Enfréntate a oleadas de naves enemigas
 - 🏆 **Sistema de Puntuación:** Compite por el puntaje más alto
 - 🌟 **Niveles Progresivos:** La dificultad aumenta con cada nivel
       
@@ -80,7 +80,7 @@ El juego está organizado en varias clases principales:
       
 <div align="center">
     <strong>Nicolás Posada García</strong>
-    <p>Desarrollador de Software | Entusiasta de los Videojuegos</p>
+    <p>Futuro Ingenierio de sistemas y computación | Entusiasta de los Videojuegos</p>
         <a href="https://www.linkedin.com/in/nicolasposada/">
           <img src="https://img.shields.io/badge/-LinkedIn-0077B5?style=flat&logo=Linkedin&logoColor=white" alt="LinkedIn">
         </a>
