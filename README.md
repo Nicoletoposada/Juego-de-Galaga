@@ -5,7 +5,7 @@
       
 <div align="center">
     <img src="./assets/Nave.PNG" alt="Galaga Gameplay" width="5%">
-    <img src="./assets/Enemigos.PNG" alt="Galaga Gameplay" width="5%">
+    <img src="./assets/Enemigos.png" alt="Galaga Gameplay" width="5%">
 </div>
       
 ## 🎮 Características del Juego
