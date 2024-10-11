@@ -22,6 +22,22 @@ FPS = 60
 #Fuente para el texto
 fuente = pygame.font.Font(None, 36)
 
+#Clase para las balas del jugador
+class Bala(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((5, 10))
+        self.image.fill(BLANCO)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.bottom = y
+        self.velocidad_y = -10
+    
+    def update(self):
+        self.rect.y += self.velocidad_y
+        if self.rect.bottom < 0:
+            self.kill()
+
 #Clase para el jugador
 class Jugador(pygame.sprite.Sprite):
     def __init__(self, todas_las_sprites, balas):
@@ -83,16 +99,21 @@ class Jugador(pygame.sprite.Sprite):
 
 #Clase para los enemigos
 class Enemigo(pygame.sprite.Sprite):
-    def __init__(self, nivel):
+    def __init__(self, nivel, todas_las_sprites, balas_enemigas):
         super().__init__()
         # Cargar la imagen del enemigo
         ruta_imagen = os.path.join("assets", "Enemigos.png")
         self.image = pygame.image.load(ruta_imagen).convert_alpha()
-        self.image = pygame.transform.scale(self.image, (45, 38)) #Ajusta el tamaño si es necesario
+        self.image = pygame.transform.scale(self.image, (45, 38))
+        self.image = pygame.transform.flip(self.image, False, True)  # Voltear verticalmente
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(0, ANCHO - self.rect.width)
         self.rect.y = random.randint(-100, -40)
         self.velocidad_y = random.randint(1, 3) + nivel // 5
+        self.todas_las_sprites = todas_las_sprites
+        self.balas_enemigas = balas_enemigas
+        self.ultimo_disparo = pygame.time.get_ticks()
+        self.cadencia_disparo = random.randint(1000, 3000)  # Entre 1 y 3 segundos
     
     def update(self):
         #Mover el enemigo hacia abajo
@@ -101,23 +122,32 @@ class Enemigo(pygame.sprite.Sprite):
         if self.rect.top > ALTO:
             self.rect.x = random.randint(0, ANCHO - self.rect.width)
             self.rect.y = random.randint(-100, -40)
+        
+        # Lógica de disparo
+        ahora = pygame.time.get_ticks()
+        if ahora - self.ultimo_disparo > self.cadencia_disparo:
+            self.disparar()
+            self.ultimo_disparo = ahora
 
-#Clase para las balas
-class Bala(pygame.sprite.Sprite):
+    def disparar(self):
+        bala = BalaEnemiga(self.rect.centerx, self.rect.bottom)
+        self.todas_las_sprites.add(bala)
+        self.balas_enemigas.add(bala)
+
+class BalaEnemiga(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.Surface((5, 10)) #Crear la imagen de la bala
-        self.image.fill(BLANCO)
+        self.image = pygame.Surface((5, 10))
+        self.image.fill(ROJO)
         self.rect = self.image.get_rect()
         self.rect.centerx = x
-        self.rect.bottom = y
-        self.velocidad_y = -10
+        self.rect.top = y
+        self.velocidad_y = 5
     
     def update(self):
         #Mover la bala hacia arriba
         self.rect.y += self.velocidad_y
-        #Eliminar la bala si sale de la pantalla
-        if self.rect.bottom < 0:
+        if self.rect.top > ALTO:
             self.kill()
 
 #Función para mostrar texto en pantalla
@@ -152,14 +182,15 @@ def juego():
     todas_las_sprites = pygame.sprite.Group()
     enemigos = pygame.sprite.Group()
     balas = pygame.sprite.Group()
+    balas_enemigas = pygame.sprite.Group()
 
     #Crear el jugador
     jugador = Jugador(todas_las_sprites, balas)
     todas_las_sprites.add(jugador)
 
-    #Crear enemigos iniciales
-    for _ in range(8):
-        enemigo = Enemigo(1)
+    #Crear menos enemigos iniciales
+    for _ in range(4):  # Cambiado de 8 a 4
+        enemigo = Enemigo(1, todas_las_sprites, balas_enemigas)
         todas_las_sprites.add(enemigo)
         enemigos.add(enemigo)
 
@@ -190,7 +221,7 @@ def juego():
         for impacto in impactos:
             puntaje += 1
             enemigos_eliminados += 1
-            enemigo = Enemigo(nivel)
+            enemigo = Enemigo(nivel, todas_las_sprites, balas_enemigas)
             todas_las_sprites.add(enemigo)
             enemigos.add(enemigo)
 
@@ -199,13 +230,18 @@ def juego():
                 nivel += 1
                 #Añadir nuevos enemigos cada nivel
                 for _ in range(2):
-                    enemigo = Enemigo(nivel)
+                    enemigo = Enemigo(nivel, todas_las_sprites, balas_enemigas)
                     todas_las_sprites.add(enemigo)
                     enemigos.add(enemigo)
 
         #Revisar colisiones entre jugador y enemigos
         impactos = pygame.sprite.spritecollide(jugador, enemigos, False)
         if impactos:
+            return True
+
+        #Revisar colisiones entre jugador y balas enemigas
+        impactos_balas_enemigas = pygame.sprite.spritecollide(jugador, balas_enemigas, True)
+        if impactos_balas_enemigas:
             return True
 
         #Dibujar todo en la pantalla

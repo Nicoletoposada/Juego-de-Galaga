@@ -5,7 +5,7 @@
       
 <div align="center">
     <img src="./assets/Nave.PNG" alt="Galaga Gameplay" width="5%">
-    <img src="./assets/Enemigo.PNG" alt="Galaga Gameplay" width="5%">
+    <img src="./assets/Enemigos.PNG" alt="Galaga Gameplay" width="5%">
 </div>
       
 ## 🎮 Características del Juego
@@ -31,7 +31,44 @@
     <br>
     <img src="https://www.pygame.org/docs/_static/pygame_logo.svg" alt="Pygame" height="40">
 </p>
-      
+
+## 🎨 Gráficos
+
+El juego utiliza imágenes personalizadas para la nave del jugador y los enemigos:
+
+- `Nave.PNG`: Representa la nave del jugador
+- `Enemigos.png`: Representa a los enemigos
+
+Estas imágenes se encuentran en la carpeta `assets`.
+
+## 🕹️ Controles Adicionales
+
+- Presiona <kbd>Enter</kbd> en el menú principal para iniciar el juego
+- Presiona <kbd>Esc</kbd> en el menú principal para salir del juego
+
+## 🌟 Características Adicionales
+
+- **Disparos Enemigos:** Los enemigos también disparan, ¡cuidado con sus balas!
+- **Aumento de Dificultad:** El juego se vuelve más desafiante a medida que avanzas:
+  - La velocidad de los enemigos aumenta con cada nivel
+  - Se añaden más enemigos cada 10 enemigos eliminados
+- **Pantalla de Game Over:** El juego termina si tu nave colisiona con un enemigo o es alcanzada por una bala enemiga
+
+## 🛠️ Estructura del Código
+
+El juego está organizado en varias clases principales:
+
+- `Jugador`: Controla la nave del jugador
+- `Enemigo`: Maneja el comportamiento de los enemigos
+- `Bala`: Representa los disparos del jugador
+- `BalaEnemiga`: Representa los disparos de los enemigos
+
+## 📊 Sistema de Puntuación y Niveles
+
+- Gana 1 punto por cada enemigo eliminado
+- El nivel aumenta cada 10 enemigos eliminados
+- El puntaje y el nivel actual se muestran en la pantalla de juego
+
 ## 📈 Desarrollo Futuro
       
 - [ ] Implementar power-ups
