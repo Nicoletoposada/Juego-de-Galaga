@@ -1,6 +1,6 @@
 import pygame #Biblioteca principal para el desarrollo de juegos en Python.
 import random #Módulo de Python para generar números aleatorios.
-import os #Añade esta importación
+import os #Módulo para interactuar con el sistema operativo, útil para manejar rutas de archivos.
 
 #Inicializar Pygame
 pygame.init()
@@ -189,7 +189,7 @@ def juego():
     todas_las_sprites.add(jugador)
 
     #Crear menos enemigos iniciales
-    for _ in range(4):  # Cambiado de 8 a 4
+    for _ in range(4): #Cambiado de 8 a 4
         enemigo = Enemigo(1, todas_las_sprites, balas_enemigas)
         todas_las_sprites.add(enemigo)
         enemigos.add(enemigo)
