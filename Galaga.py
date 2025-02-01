@@ -55,20 +55,28 @@ class Jugador(pygame.sprite.Sprite):
         self.balas = balas
         self.ultimo_disparo = pygame.time.get_ticks()
         self.cadencia_disparo = 250 #Tiempo mínimo entre disparos (en milisegundos)
+        # Nuevos atributos para power-ups
+        self.power_ups_activos = {}
+        self.disparo_triple = False
+        self.tiene_escudo = False
+        self.velocidad_normal = 5
+        self.cadencia_normal = 250
     
     def update(self):
-        #Actualizar la posición del jugador basado en las teclas presionadas
+        # Actualizar la velocidad basada en power-ups
+        velocidad_actual = self.velocidad_normal * (2 if 'velocidad' in self.power_ups_activos else 1)
+        
         self.velocidad_x = 0
         self.velocidad_y = 0
         teclas = pygame.key.get_pressed()
         if teclas[pygame.K_LEFT]:
-            self.velocidad_x = -5
+            self.velocidad_x = -velocidad_actual
         if teclas[pygame.K_RIGHT]:
-            self.velocidad_x = 5
+            self.velocidad_x = velocidad_actual
         if teclas[pygame.K_UP]:
-            self.velocidad_y = -5
+            self.velocidad_y = -velocidad_actual
         if teclas[pygame.K_DOWN]:
-            self.velocidad_y = 5
+            self.velocidad_y = velocidad_actual
         
         #Disparar si la barra espaciadora está presionada
         if teclas[pygame.K_SPACE]:
@@ -88,14 +96,69 @@ class Jugador(pygame.sprite.Sprite):
         if self.rect.bottom > ALTO:
             self.rect.bottom = ALTO
 
-    def disparar(self):
-        #Crear una nueva bala si ha pasado suficiente tiempo desde el último disparo
+        # Actualizar power-ups
         ahora = pygame.time.get_ticks()
-        if ahora - self.ultimo_disparo > self.cadencia_disparo:
-            bala = Bala(self.rect.centerx, self.rect.top)
-            self.todas_las_sprites.add(bala)
-            self.balas.add(bala)
+        power_ups_expirados = []
+        for poder, tiempo_fin in self.power_ups_activos.items():
+            if ahora >= tiempo_fin:
+                power_ups_expirados.append(poder)
+        
+        for poder in power_ups_expirados:
+            self.desactivar_power_up(poder)
+
+    def disparar(self):
+        ahora = pygame.time.get_ticks()
+        cadencia_actual = self.cadencia_normal // (2 if 'rapido' in self.power_ups_activos else 1)
+        
+        if ahora - self.ultimo_disparo > cadencia_actual:
+            if self.disparo_triple:
+                # Disparo triple
+                for offset in [-20, 0, 20]:
+                    bala = Bala(self.rect.centerx + offset, self.rect.top)
+                    self.todas_las_sprites.add(bala)
+                    self.balas.add(bala)
+            else:
+                # Disparo normal
+                bala = Bala(self.rect.centerx, self.rect.top)
+                self.todas_las_sprites.add(bala)
+                self.balas.add(bala)
+            
             self.ultimo_disparo = ahora
+
+    def activar_power_up(self, tipo):
+        ahora = pygame.time.get_ticks()
+        duracion = {
+            'triple': 10000,    # 10 segundos
+            'escudo': 5000,     # 5 segundos
+            'velocidad': 8000,  # 8 segundos
+            'rapido': 7000,     # 7 segundos
+            'bomba': 0          # Efecto instantáneo
+        }
+        
+        if tipo == 'triple':
+            self.disparo_triple = True
+        elif tipo == 'escudo':
+            self.tiene_escudo = True
+        elif tipo == 'bomba':
+            self.activar_bomba()
+            return  # La bomba es instantánea, no necesita tiempo de expiración
+        
+        self.power_ups_activos[tipo] = ahora + duracion[tipo]
+
+    def desactivar_power_up(self, tipo):
+        if tipo == 'triple':
+            self.disparo_triple = False
+        elif tipo == 'escudo':
+            self.tiene_escudo = False
+        
+        if tipo in self.power_ups_activos:
+            del self.power_ups_activos[tipo]
+
+    def activar_bomba(self):
+        # Eliminar todos los enemigos en pantalla
+        for sprite in self.todas_las_sprites:
+            if isinstance(sprite, Enemigo):
+                sprite.kill()
 
 #Clase para los enemigos
 class Enemigo(pygame.sprite.Sprite):
@@ -157,16 +220,43 @@ class PowerUp(pygame.sprite.Sprite):
         self.tipo = tipo
         # Diccionario con las características de cada power-up
         self.power_ups = {
-            'triple': {'color': (255, 255, 0), 'duracion': 10000, 'tamaño': (20, 20)},
-            'escudo': {'color': (0, 191, 255), 'duracion': 5000, 'tamaño': (15, 15)},
-            'velocidad': {'color': (255, 215, 0), 'duracion': 8000, 'tamaño': (15, 15)},
-            'rapido': {'color': (255, 69, 0), 'duracion': 7000, 'tamaño': (15, 15)},
-            'bomba': {'color': (255, 0, 0), 'duracion': 0, 'tamaño': (25, 25)}
+            'triple': {
+                'imagen': 'triple_shot.png',
+                'duracion': 10000,
+                'tamaño': (20, 20)
+            },
+            'escudo': {
+                'imagen': 'shield.png',
+                'duracion': 5000,
+                'tamaño': (20, 20)
+            },
+            'velocidad': {
+                'imagen': 'speed.png',
+                'duracion': 8000,
+                'tamaño': (20, 20)
+            },
+            'rapido': {
+                'imagen': 'rapid_fire.png',
+                'duracion': 7000,
+                'tamaño': (20, 20)
+            },
+            'bomba': {
+                'imagen': 'bomb.png',
+                'duracion': 0,
+                'tamaño': (25, 25)
+            }
         }
         
-        # Crear la imagen del power-up
-        self.image = pygame.Surface(self.power_ups[tipo]['tamaño'])
-        self.image.fill(self.power_ups[tipo]['color'])
+        # Cargar la imagen del power-up
+        try:
+            ruta_imagen = os.path.join("assets", self.power_ups[tipo]['imagen'])
+            self.image = pygame.image.load(ruta_imagen).convert_alpha()
+            self.image = pygame.transform.scale(self.image, self.power_ups[tipo]['tamaño'])
+        except (pygame.error, FileNotFoundError):
+            # Si no se encuentra la imagen, crear un power-up con forma básica como respaldo
+            self.image = pygame.Surface(self.power_ups[tipo]['tamaño'])
+            self.image.fill((255, 255, 255))  # Color blanco por defecto
+            
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -272,20 +362,21 @@ def juego():
                     enemigos.add(enemigo)
 
         #Revisar colisiones entre jugador y enemigos
-        impactos = pygame.sprite.spritecollide(jugador, enemigos, False)
-        if impactos:
-            return True
-
-        #Revisar colisiones entre jugador y balas enemigas
-        impactos_balas_enemigas = pygame.sprite.spritecollide(jugador, balas_enemigas, True)
-        if impactos_balas_enemigas:
-            return True
+        if jugador.tiene_escudo:
+            # Con escudo, solo destruir los enemigos/balas sin dañar al jugador
+            impactos = pygame.sprite.spritecollide(jugador, enemigos, True)
+            impactos_balas_enemigas = pygame.sprite.spritecollide(jugador, balas_enemigas, True)
+        else:
+            # Sin escudo, el jugador pierde al ser golpeado
+            impactos = pygame.sprite.spritecollide(jugador, enemigos, False)
+            impactos_balas_enemigas = pygame.sprite.spritecollide(jugador, balas_enemigas, True)
+            if impactos or impactos_balas_enemigas:
+                return True
 
         #Revisar colisiones entre jugador y power-ups
         impactos_power_ups = pygame.sprite.spritecollide(jugador, power_ups, True)
         for power_up in impactos_power_ups:
-            print(f"¡Power-up recogido: {power_up.tipo}!")
-            # Aquí implementaremos los efectos de cada power-up más adelante
+            jugador.activar_power_up(power_up.tipo)
 
         #Dibujar todo en la pantalla
         pantalla.fill(NEGRO)
