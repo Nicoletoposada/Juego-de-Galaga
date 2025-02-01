@@ -15,6 +15,7 @@
 - 🚀 **Enemigos Dinámicos:** Enfréntate a oleadas de naves enemigas
 - 🏆 **Sistema de Puntuación:** Compite por el puntaje más alto
 - 🌟 **Niveles Progresivos:** La dificultad aumenta con cada nivel
+- ❤️ **Sistema de Vidas:** 3 vidas para completar tu misión
 - 💫 **Power-ups:** Recoge mejoras especiales que aparecen al eliminar enemigos
       
 ## 🕹️ Cómo Jugar
@@ -22,7 +23,7 @@
 1. Usa las flechas ⬅️➡️⬆️⬇️ para mover tu nave
 2. Presiona <kbd>Espacio</kbd> para disparar
 3. Elimina enemigos para ganar puntos
-4. Evita colisionar con los enemigos
+4. Evita colisionar con los enemigos y sus disparos
 5. ¡Sobrevive el mayor tiempo posible!
       
 ## 🛠️ Tecnologías Utilizadas
@@ -35,10 +36,14 @@
 
 ## 🎨 Gráficos
 
-El juego utiliza imágenes personalizadas para la nave del jugador y los enemigos:
+El juego utiliza imágenes personalizadas:
 
 - `Nave.PNG`: Representa la nave del jugador
 - `Enemigos.png`: Representa a los enemigos
+- `heart.png`: Muestra las vidas del jugador y también el power-up de vida extra
+- `triple_shot.png`: Power-up de disparo triple
+- `speed.png`: Power-up de velocidad
+- `rapid_fire.png`: Power-up de disparo rápido
 
 Estas imágenes se encuentran en la carpeta `assets`.
 
@@ -49,39 +54,39 @@ Estas imágenes se encuentran en la carpeta `assets`.
 
 ## 🌟 Características Adicionales
 
+- **Sistema de Vidas:** Comienza con 3 vidas, ¡úsalas sabiamente!
 - **Disparos Enemigos:** Los enemigos también disparan, ¡cuidado con sus balas!
 - **Power-ups Variados:** 30% de probabilidad de obtener power-ups al eliminar enemigos:
   - 🔺 **Disparo Triple:** Dispara tres balas en abanico
-  - 🛡️ **Escudo Protector:** Inmunidad temporal
+  - ❤️ **Vida Extra:** Recupera una vida (máximo 3)
   - ⚡ **Velocidad Aumentada:** Mayor velocidad de movimiento
   - 🔥 **Disparo Rápido:** Reduce el tiempo entre disparos
-  - 💣 **Bomba:** Elimina todos los enemigos en pantalla
 - **Aumento de Dificultad:** El juego se vuelve más desafiante a medida que avanzas:
   - La velocidad de los enemigos aumenta con cada nivel
   - Se añaden más enemigos cada 10 enemigos eliminados
-- **Pantalla de Game Over:** El juego termina si tu nave colisiona con un enemigo o es alcanzada por una bala enemiga
 
 ## 🛠️ Estructura del Código
 
 El juego está organizado en varias clases principales:
 
-- `Jugador`: Controla la nave del jugador
+- `Jugador`: Controla la nave del jugador y gestiona las vidas
 - `Enemigo`: Maneja el comportamiento de los enemigos
 - `Bala`: Representa los disparos del jugador
 - `BalaEnemiga`: Representa los disparos de los enemigos
+- `PowerUp`: Gestiona los power-ups y sus efectos
 
 ## 📊 Sistema de Puntuación y Niveles
 
 - Gana 1 punto por cada enemigo eliminado
 - El nivel aumenta cada 10 enemigos eliminados
-- El puntaje y el nivel actual se muestran en la pantalla de juego
+- El puntaje, nivel actual y vidas restantes se muestran en la pantalla de juego
 
 ## 📈 Desarrollo Futuro
       
-- [ ] Hacer mejoras en los power-ups
 - [ ] Añadir efectos de sonido y música
-- [ ] Crear un sistema de vidas
+- [ ] Implementar sistema de varias naves para jugar
 - [ ] Diseñar niveles de jefe
+- [ ] Agregar nuevos tipos de power-ups
       
 ## 👨‍💻 Autor
       

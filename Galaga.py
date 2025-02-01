@@ -7,7 +7,7 @@ pygame.init()
 
 #Configuraciones básicas
 ANCHO = 500 #Ancho de la ventana del juego
-ALTO = 650 #Alto de la ventana del juego
+ALTO = 630 #Alto de la ventana del juego
 pantalla = pygame.display.set_mode((ANCHO, ALTO)) #Crear la ventana del juego
 pygame.display.set_caption("Galaga en Python") #Establecer el título de la ventana
 
@@ -55,12 +55,24 @@ class Jugador(pygame.sprite.Sprite):
         self.balas = balas
         self.ultimo_disparo = pygame.time.get_ticks()
         self.cadencia_disparo = 250 #Tiempo mínimo entre disparos (en milisegundos)
-        # Nuevos atributos para power-ups
+        # Modificar atributos de power-ups
         self.power_ups_activos = {}
         self.disparo_triple = False
-        self.tiene_escudo = False
         self.velocidad_normal = 5
         self.cadencia_normal = 250
+        self.vidas = 3
+        self.vidas_maximas = 3
+        # Color original para el efecto de escudo
+        self.color_original = self.image.copy()
+        self.ultimo_parpadeo = 0
+        self.parpadeo_delay = 200  # milisegundos
+        # Cargar imagen de corazón para las vidas
+        ruta_corazon = os.path.join("assets", "heart.png")
+        try:
+            self.imagen_vida = pygame.image.load(ruta_corazon).convert_alpha()
+            self.imagen_vida = pygame.transform.scale(self.imagen_vida, (25, 25))
+        except (pygame.error, FileNotFoundError):
+            self.imagen_vida = None
     
     def update(self):
         # Actualizar la velocidad basada en power-ups
@@ -106,6 +118,21 @@ class Jugador(pygame.sprite.Sprite):
         for poder in power_ups_expirados:
             self.desactivar_power_up(poder)
 
+        # Efecto visual del escudo
+        if 'vida' in self.power_ups_activos:
+            ahora = pygame.time.get_ticks()
+            if ahora - self.ultimo_parpadeo > self.parpadeo_delay:
+                self.ultimo_parpadeo = ahora
+                # Alternar entre imagen normal y efecto de escudo
+                if self.image == self.color_original:
+                    # Crear efecto de escudo (tinte azul)
+                    self.image = self.color_original.copy()
+                    superficie_azul = pygame.Surface(self.image.get_size()).convert_alpha()
+                    superficie_azul.fill((0, 100, 255, 100))
+                    self.image.blit(superficie_azul, (0,0))
+                else:
+                    self.image = self.color_original.copy()
+
     def disparar(self):
         ahora = pygame.time.get_ticks()
         cadencia_actual = self.cadencia_normal // (2 if 'rapido' in self.power_ups_activos else 1)
@@ -129,36 +156,32 @@ class Jugador(pygame.sprite.Sprite):
         ahora = pygame.time.get_ticks()
         duracion = {
             'triple': 10000,    # 10 segundos
-            'escudo': 5000,     # 5 segundos
             'velocidad': 8000,  # 8 segundos
             'rapido': 7000,     # 7 segundos
-            'bomba': 0          # Efecto instantáneo
+            'vida': 0           # Efecto instantáneo
         }
         
         if tipo == 'triple':
             self.disparo_triple = True
-        elif tipo == 'escudo':
-            self.tiene_escudo = True
-        elif tipo == 'bomba':
-            self.activar_bomba()
-            return  # La bomba es instantánea, no necesita tiempo de expiración
+        elif tipo == 'vida':
+            if self.vidas < self.vidas_maximas:
+                self.vidas += 1
+            return  # Efecto instantáneo, no necesita tiempo de expiración
         
         self.power_ups_activos[tipo] = ahora + duracion[tipo]
 
     def desactivar_power_up(self, tipo):
         if tipo == 'triple':
             self.disparo_triple = False
-        elif tipo == 'escudo':
-            self.tiene_escudo = False
         
         if tipo in self.power_ups_activos:
             del self.power_ups_activos[tipo]
 
-    def activar_bomba(self):
-        # Eliminar todos los enemigos en pantalla
-        for sprite in self.todas_las_sprites:
-            if isinstance(sprite, Enemigo):
-                sprite.kill()
+    def recibir_daño(self):
+        if 'vida' not in self.power_ups_activos:
+            self.vidas -= 1
+            return self.vidas <= 0
+        return False
 
 #Clase para los enemigos
 class Enemigo(pygame.sprite.Sprite):
@@ -218,16 +241,16 @@ class PowerUp(pygame.sprite.Sprite):
     def __init__(self, tipo, x, y):
         super().__init__()
         self.tipo = tipo
-        # Diccionario con las características de cada power-up
+        # Diccionario actualizado con las características de cada power-up
         self.power_ups = {
             'triple': {
                 'imagen': 'triple_shot.png',
                 'duracion': 10000,
                 'tamaño': (20, 20)
             },
-            'escudo': {
-                'imagen': 'shield.png',
-                'duracion': 5000,
+            'vida': {  # Reemplazamos 'escudo' por 'vida extra'
+                'imagen': 'heart.png',  # Asegúrate de tener esta imagen
+                'duracion': 0,  # Efecto instantáneo
                 'tamaño': (20, 20)
             },
             'velocidad': {
@@ -239,11 +262,6 @@ class PowerUp(pygame.sprite.Sprite):
                 'imagen': 'rapid_fire.png',
                 'duracion': 7000,
                 'tamaño': (20, 20)
-            },
-            'bomba': {
-                'imagen': 'bomb.png',
-                'duracion': 0,
-                'tamaño': (25, 25)
             }
         }
         
@@ -342,7 +360,7 @@ def juego():
             
             # 30% de probabilidad de generar un power-up
             if random.random() < 0.3:
-                tipos_power_up = ['triple', 'escudo', 'velocidad', 'rapido', 'bomba']
+                tipos_power_up = ['triple', 'vida', 'velocidad', 'rapido']
                 tipo_elegido = random.choice(tipos_power_up)
                 power_up = PowerUp(tipo_elegido, impacto.rect.centerx, impacto.rect.centery)
                 todas_las_sprites.add(power_up)
@@ -362,16 +380,19 @@ def juego():
                     enemigos.add(enemigo)
 
         #Revisar colisiones entre jugador y enemigos
-        if jugador.tiene_escudo:
-            # Con escudo, solo destruir los enemigos/balas sin dañar al jugador
-            impactos = pygame.sprite.spritecollide(jugador, enemigos, True)
-            impactos_balas_enemigas = pygame.sprite.spritecollide(jugador, balas_enemigas, True)
-        else:
-            # Sin escudo, el jugador pierde al ser golpeado
-            impactos = pygame.sprite.spritecollide(jugador, enemigos, False)
-            impactos_balas_enemigas = pygame.sprite.spritecollide(jugador, balas_enemigas, True)
-            if impactos or impactos_balas_enemigas:
+        impactos = pygame.sprite.spritecollide(jugador, enemigos, False)
+        impactos_balas = pygame.sprite.spritecollide(jugador, balas_enemigas, True)
+        if impactos or impactos_balas:
+            game_over = jugador.recibir_daño()
+            if game_over:
                 return True
+            else:
+                # Dar invulnerabilidad temporal y reposicionar
+                jugador.rect.centerx = ANCHO // 2
+                jugador.rect.bottom = ALTO - 10
+                # Eliminar enemigos cercanos para evitar muerte instantánea
+                for enemigo in impactos:
+                    enemigo.kill()
 
         #Revisar colisiones entre jugador y power-ups
         impactos_power_ups = pygame.sprite.spritecollide(jugador, power_ups, True)
@@ -383,6 +404,15 @@ def juego():
         todas_las_sprites.draw(pantalla)
         dibujar_texto(pantalla, f"Puntaje: {puntaje}", 22, ANCHO // 2, 10)
         dibujar_texto(pantalla, f"Nivel: {nivel}", 22, ANCHO - 60, 10)
+
+        # Dibujar vidas con imagen de corazón
+        if jugador.imagen_vida:
+            for i in range(jugador.vidas):
+                pantalla.blit(jugador.imagen_vida, (10 + i * 30, 10))
+        else:
+            # Respaldo si no se encuentra la imagen
+            for i in range(jugador.vidas):
+                pygame.draw.rect(pantalla, ROJO, (10 + i * 30, 10, 20, 20))
 
         #Actualizar la pantalla
         pygame.display.flip()
