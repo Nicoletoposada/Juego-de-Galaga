@@ -150,6 +150,33 @@ class BalaEnemiga(pygame.sprite.Sprite):
         if self.rect.top > ALTO:
             self.kill()
 
+#Clase para los power-ups
+class PowerUp(pygame.sprite.Sprite):
+    def __init__(self, tipo, x, y):
+        super().__init__()
+        self.tipo = tipo
+        # Diccionario con las características de cada power-up
+        self.power_ups = {
+            'triple': {'color': (255, 255, 0), 'duracion': 10000, 'tamaño': (20, 20)},
+            'escudo': {'color': (0, 191, 255), 'duracion': 5000, 'tamaño': (15, 15)},
+            'velocidad': {'color': (255, 215, 0), 'duracion': 8000, 'tamaño': (15, 15)},
+            'rapido': {'color': (255, 69, 0), 'duracion': 7000, 'tamaño': (15, 15)},
+            'bomba': {'color': (255, 0, 0), 'duracion': 0, 'tamaño': (25, 25)}
+        }
+        
+        # Crear la imagen del power-up
+        self.image = pygame.Surface(self.power_ups[tipo]['tamaño'])
+        self.image.fill(self.power_ups[tipo]['color'])
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.velocidad_y = 2
+        
+    def update(self):
+        self.rect.y += self.velocidad_y
+        if self.rect.top > ALTO:
+            self.kill()
+
 #Función para mostrar texto en pantalla
 def dibujar_texto(superficie, texto, tamaño, x, y):
     fuente = pygame.font.Font(None, tamaño)
@@ -183,6 +210,7 @@ def juego():
     enemigos = pygame.sprite.Group()
     balas = pygame.sprite.Group()
     balas_enemigas = pygame.sprite.Group()
+    power_ups = pygame.sprite.Group()  # Nuevo grupo para power-ups
 
     #Crear el jugador
     jugador = Jugador(todas_las_sprites, balas)
@@ -221,6 +249,15 @@ def juego():
         for impacto in impactos:
             puntaje += 1
             enemigos_eliminados += 1
+            
+            # 30% de probabilidad de generar un power-up
+            if random.random() < 0.3:
+                tipos_power_up = ['triple', 'escudo', 'velocidad', 'rapido', 'bomba']
+                tipo_elegido = random.choice(tipos_power_up)
+                power_up = PowerUp(tipo_elegido, impacto.rect.centerx, impacto.rect.centery)
+                todas_las_sprites.add(power_up)
+                power_ups.add(power_up)
+            
             enemigo = Enemigo(nivel, todas_las_sprites, balas_enemigas)
             todas_las_sprites.add(enemigo)
             enemigos.add(enemigo)
@@ -243,6 +280,12 @@ def juego():
         impactos_balas_enemigas = pygame.sprite.spritecollide(jugador, balas_enemigas, True)
         if impactos_balas_enemigas:
             return True
+
+        #Revisar colisiones entre jugador y power-ups
+        impactos_power_ups = pygame.sprite.spritecollide(jugador, power_ups, True)
+        for power_up in impactos_power_ups:
+            print(f"¡Power-up recogido: {power_up.tipo}!")
+            # Aquí implementaremos los efectos de cada power-up más adelante
 
         #Dibujar todo en la pantalla
         pantalla.fill(NEGRO)

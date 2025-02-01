@@ -15,6 +15,7 @@
 - 🚀 **Enemigos Dinámicos:** Enfréntate a oleadas de naves enemigas
 - 🏆 **Sistema de Puntuación:** Compite por el puntaje más alto
 - 🌟 **Niveles Progresivos:** La dificultad aumenta con cada nivel
+- 💫 **Power-ups:** Recoge mejoras especiales que aparecen al eliminar enemigos
       
 ## 🕹️ Cómo Jugar
       
@@ -49,6 +50,12 @@ Estas imágenes se encuentran en la carpeta `assets`.
 ## 🌟 Características Adicionales
 
 - **Disparos Enemigos:** Los enemigos también disparan, ¡cuidado con sus balas!
+- **Power-ups Variados:** 30% de probabilidad de obtener power-ups al eliminar enemigos:
+  - 🔺 **Disparo Triple:** Dispara tres balas en abanico
+  - 🔵 **Escudo Protector:** Inmunidad temporal
+  - ⚡ **Velocidad Aumentada:** Mayor velocidad de movimiento
+  - 🔴 **Disparo Rápido:** Reduce el tiempo entre disparos
+  - 💥 **Bomba:** Elimina todos los enemigos en pantalla
 - **Aumento de Dificultad:** El juego se vuelve más desafiante a medida que avanzas:
   - La velocidad de los enemigos aumenta con cada nivel
   - Se añaden más enemigos cada 10 enemigos eliminados
@@ -71,7 +78,7 @@ El juego está organizado en varias clases principales:
 
 ## 📈 Desarrollo Futuro
       
-- [ ] Implementar power-ups
+- [ ] Poner imagenes de los power-ups
 - [ ] Añadir efectos de sonido y música
 - [ ] Crear un sistema de vidas
 - [ ] Diseñar niveles de jefe
