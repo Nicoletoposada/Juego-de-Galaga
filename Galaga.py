@@ -55,18 +55,18 @@ class Jugador(pygame.sprite.Sprite):
         self.balas = balas
         self.ultimo_disparo = pygame.time.get_ticks()
         self.cadencia_disparo = 250 #Tiempo mínimo entre disparos (en milisegundos)
-        # Modificar atributos de power-ups
+        #Modificar atributos de power-ups
         self.power_ups_activos = {}
         self.disparo_triple = False
         self.velocidad_normal = 5
         self.cadencia_normal = 250
         self.vidas = 3
         self.vidas_maximas = 3
-        # Color original para el efecto de escudo
+        #Color original para el efecto de escudo
         self.color_original = self.image.copy()
         self.ultimo_parpadeo = 0
-        self.parpadeo_delay = 200  # milisegundos
-        # Cargar imagen de corazón para las vidas
+        self.parpadeo_delay = 200 #milisegundos
+        #Cargar imagen de corazón para las vidas
         ruta_corazon = os.path.join("assets", "heart.png")
         try:
             self.imagen_vida = pygame.image.load(ruta_corazon).convert_alpha()
@@ -75,7 +75,7 @@ class Jugador(pygame.sprite.Sprite):
             self.imagen_vida = None
     
     def update(self):
-        # Actualizar la velocidad basada en power-ups
+        #Actualizar la velocidad basada en power-ups
         velocidad_actual = self.velocidad_normal * (2 if 'velocidad' in self.power_ups_activos else 1)
         
         self.velocidad_x = 0
@@ -108,7 +108,7 @@ class Jugador(pygame.sprite.Sprite):
         if self.rect.bottom > ALTO:
             self.rect.bottom = ALTO
 
-        # Actualizar power-ups
+        #Actualizar power-ups
         ahora = pygame.time.get_ticks()
         power_ups_expirados = []
         for poder, tiempo_fin in self.power_ups_activos.items():
@@ -118,14 +118,14 @@ class Jugador(pygame.sprite.Sprite):
         for poder in power_ups_expirados:
             self.desactivar_power_up(poder)
 
-        # Efecto visual del escudo
+        #Efecto visual del escudo
         if 'vida' in self.power_ups_activos:
             ahora = pygame.time.get_ticks()
             if ahora - self.ultimo_parpadeo > self.parpadeo_delay:
                 self.ultimo_parpadeo = ahora
-                # Alternar entre imagen normal y efecto de escudo
+                #Alternar entre imagen normal y efecto de escudo
                 if self.image == self.color_original:
-                    # Crear efecto de escudo (tinte azul)
+                    #Crear efecto de escudo (tinte azul)
                     self.image = self.color_original.copy()
                     superficie_azul = pygame.Surface(self.image.get_size()).convert_alpha()
                     superficie_azul.fill((0, 100, 255, 100))
@@ -139,13 +139,13 @@ class Jugador(pygame.sprite.Sprite):
         
         if ahora - self.ultimo_disparo > cadencia_actual:
             if self.disparo_triple:
-                # Disparo triple
+                #Disparo triple
                 for offset in [-20, 0, 20]:
                     bala = Bala(self.rect.centerx + offset, self.rect.top)
                     self.todas_las_sprites.add(bala)
                     self.balas.add(bala)
             else:
-                # Disparo normal
+                #Disparo normal
                 bala = Bala(self.rect.centerx, self.rect.top)
                 self.todas_las_sprites.add(bala)
                 self.balas.add(bala)
@@ -155,10 +155,10 @@ class Jugador(pygame.sprite.Sprite):
     def activar_power_up(self, tipo):
         ahora = pygame.time.get_ticks()
         duracion = {
-            'triple': 10000,    # 10 segundos
-            'velocidad': 8000,  # 8 segundos
-            'rapido': 7000,     # 7 segundos
-            'vida': 0           # Efecto instantáneo
+            'triple': 10000, #10 segundos
+            'velocidad': 8000, #8 segundos
+            'rapido': 7000, #7 segundos
+            'vida': 0 #Efecto instantáneo
         }
         
         if tipo == 'triple':
@@ -166,7 +166,7 @@ class Jugador(pygame.sprite.Sprite):
         elif tipo == 'vida':
             if self.vidas < self.vidas_maximas:
                 self.vidas += 1
-            return  # Efecto instantáneo, no necesita tiempo de expiración
+            return #Efecto instantáneo, no necesita tiempo de expiración
         
         self.power_ups_activos[tipo] = ahora + duracion[tipo]
 
@@ -241,16 +241,16 @@ class PowerUp(pygame.sprite.Sprite):
     def __init__(self, tipo, x, y):
         super().__init__()
         self.tipo = tipo
-        # Diccionario actualizado con las características de cada power-up
+        #Diccionario actualizado con las características de cada power-up
         self.power_ups = {
             'triple': {
                 'imagen': 'triple_shot.png',
                 'duracion': 10000,
                 'tamaño': (20, 20)
             },
-            'vida': {  # Reemplazamos 'escudo' por 'vida extra'
-                'imagen': 'heart.png',  # Asegúrate de tener esta imagen
-                'duracion': 0,  # Efecto instantáneo
+            'vida': { #Reemplazamos 'escudo' por 'vida extra'
+                'imagen': 'heart.png', #Asegúrate de tener esta imagen
+                'duracion': 0, #Efecto instantáneo
                 'tamaño': (20, 20)
             },
             'velocidad': {
@@ -265,15 +265,15 @@ class PowerUp(pygame.sprite.Sprite):
             }
         }
         
-        # Cargar la imagen del power-up
+        #Cargar la imagen del power-up
         try:
             ruta_imagen = os.path.join("assets", self.power_ups[tipo]['imagen'])
             self.image = pygame.image.load(ruta_imagen).convert_alpha()
             self.image = pygame.transform.scale(self.image, self.power_ups[tipo]['tamaño'])
         except (pygame.error, FileNotFoundError):
-            # Si no se encuentra la imagen, crear un power-up con forma básica como respaldo
+            #Si no se encuentra la imagen, crear un power-up con forma básica como respaldo
             self.image = pygame.Surface(self.power_ups[tipo]['tamaño'])
-            self.image.fill((255, 255, 255))  # Color blanco por defecto
+            self.image.fill((255, 255, 255)) #Color blanco por defecto
             
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -318,7 +318,7 @@ def juego():
     enemigos = pygame.sprite.Group()
     balas = pygame.sprite.Group()
     balas_enemigas = pygame.sprite.Group()
-    power_ups = pygame.sprite.Group()  # Nuevo grupo para power-ups
+    power_ups = pygame.sprite.Group() #Nuevo grupo para power-ups
 
     #Crear el jugador
     jugador = Jugador(todas_las_sprites, balas)
@@ -358,7 +358,7 @@ def juego():
             puntaje += 1
             enemigos_eliminados += 1
             
-            # 30% de probabilidad de generar un power-up
+            #30% de probabilidad de generar un power-up
             if random.random() < 0.3:
                 tipos_power_up = ['triple', 'vida', 'velocidad', 'rapido']
                 tipo_elegido = random.choice(tipos_power_up)
@@ -387,10 +387,10 @@ def juego():
             if game_over:
                 return True
             else:
-                # Dar invulnerabilidad temporal y reposicionar
+                #Dar invulnerabilidad temporal y reposicionar
                 jugador.rect.centerx = ANCHO // 2
                 jugador.rect.bottom = ALTO - 10
-                # Eliminar enemigos cercanos para evitar muerte instantánea
+                #Eliminar enemigos cercanos para evitar muerte instantánea
                 for enemigo in impactos:
                     enemigo.kill()
 
@@ -405,12 +405,12 @@ def juego():
         dibujar_texto(pantalla, f"Puntaje: {puntaje}", 22, ANCHO // 2, 10)
         dibujar_texto(pantalla, f"Nivel: {nivel}", 22, ANCHO - 60, 10)
 
-        # Dibujar vidas con imagen de corazón
+        #Dibujar vidas con imagen de corazón
         if jugador.imagen_vida:
             for i in range(jugador.vidas):
                 pantalla.blit(jugador.imagen_vida, (10 + i * 30, 10))
         else:
-            # Respaldo si no se encuentra la imagen
+            #Respaldo si no se encuentra la imagen
             for i in range(jugador.vidas):
                 pygame.draw.rect(pantalla, ROJO, (10 + i * 30, 10, 20, 20))
 
